@@ -4,32 +4,6 @@ Date: Thu, 29 Sep 2022 14:44:20 +0200
 Subject: [PATCH] Multithreading environment variables
 
 
-diff --git a/src/main/java/com/destroystokyo/paper/io/chunk/ChunkTaskManager.java b/src/main/java/com/destroystokyo/paper/io/chunk/ChunkTaskManager.java
-index 68860a3b6db2aa50373d71aec9502c18d48ab8b9..ce78500e43a45f2ea11faebe7b0a71b7099b1fce 100644
---- a/src/main/java/com/destroystokyo/paper/io/chunk/ChunkTaskManager.java
-+++ b/src/main/java/com/destroystokyo/paper/io/chunk/ChunkTaskManager.java
-@@ -158,7 +158,7 @@ public final class ChunkTaskManager {
- 
-     public static void processConfiguration(GlobalConfiguration.AsyncChunks config) {
-         int threads = config.threads; // don't write back to config
--        int cpus = Runtime.getRuntime().availableProcessors() / 2;
-+        int cpus = Integer.getInteger("suki.systemcpus.forchunktasks", Runtime.getRuntime().availableProcessors() / 2); // Suki - multithreading environment variables
-         if (threads <= 0) {
-             if (cpus <= 4) {
-                 threads = cpus <= 2 ? 1 : 2;
-diff --git a/src/main/java/gg/pufferfish/pufferfish/tracker/MultithreadedTracker.java b/src/main/java/gg/pufferfish/pufferfish/tracker/MultithreadedTracker.java
-index ac541ddf1594ae865de02fd40940e39285043b1f..8581a1d97b01bb3961592a42030631b5240b2f4c 100644
---- a/src/main/java/gg/pufferfish/pufferfish/tracker/MultithreadedTracker.java
-+++ b/src/main/java/gg/pufferfish/pufferfish/tracker/MultithreadedTracker.java
-@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
- 
- public class MultithreadedTracker {
- 
--    private static final int parallelism = Math.max(4, Runtime.getRuntime().availableProcessors());
-+    private static final int parallelism = Integer.getInteger("suki.threads.tracker", Math.max(4, Integer.getInteger("suki.systemcpus.fortracker", Runtime.getRuntime().availableProcessors()))); // Suki - multithreading environment variables
-     private static final Executor trackerExecutor = Executors.newFixedThreadPool(parallelism, new ThreadFactoryBuilder()
-             .setNameFormat("puff-tracker-%d")
-             .setPriority(Thread.NORM_PRIORITY - 2)
 diff --git a/src/main/java/net/minecraft/Util.java b/src/main/java/net/minecraft/Util.java
 index 4b4f3533f6f8624551794e63baae87138a495835..37836dbdbff2ca4cd8bfc8300087377f70da2ee1 100644
 --- a/src/main/java/net/minecraft/Util.java
@@ -81,16 +55,16 @@ index 4b4f3533f6f8624551794e63baae87138a495835..37836dbdbff2ca4cd8bfc8300087377f
  
                  @Override
 diff --git a/src/main/java/net/minecraft/server/MCUtil.java b/src/main/java/net/minecraft/server/MCUtil.java
-index 139b4b49f635c5ec123b0562194377ae12250446..ad91db805dce17259a54593249c4fa6d31165abb 100644
+index 949e2bd008930be0792065cf9ce92972c28c4354..7b7eb0b41cbefb8d42607cb9aae969d73e806611 100644
 --- a/src/main/java/net/minecraft/server/MCUtil.java
 +++ b/src/main/java/net/minecraft/server/MCUtil.java
-@@ -57,7 +57,7 @@ import java.util.concurrent.ConcurrentLinkedQueue; // JettPack
+@@ -55,7 +55,7 @@ import java.util.function.Supplier;
+ 
  public final class MCUtil {
-     public static final ConcurrentLinkedQueue smallAsyncTasks = new ConcurrentLinkedQueue(); // JettPack
      public static final ThreadPoolExecutor asyncExecutor = new ThreadPoolExecutor(
--        4, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, // JettPack
+-        0, 2, 60L, TimeUnit.SECONDS,
 +        Integer.getInteger("suki.threads.asyncexecutor", 4), Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, // JettPack // Suki - multithreading environment variables
-         new SynchronousQueue<Runnable>(), // JettPack
+         new LinkedBlockingQueue<>(),
          new ThreadFactoryBuilder()
              .setNameFormat("Paper Async Task Handler Thread - %1$d")
 diff --git a/src/main/java/net/minecraft/server/Main.java b/src/main/java/net/minecraft/server/Main.java
@@ -107,7 +81,7 @@ index 0b677d128cbd108bb58d74d3cfe6015551e94143..72adf5879fc476e1495cfeaf8df31212
          worldUpgrader.convert();
      }
 diff --git a/src/main/java/net/minecraft/server/MinecraftServer.java b/src/main/java/net/minecraft/server/MinecraftServer.java
-index 5c9cf19ac19d989b857f094d36fc9ab71cfb60c6..78614c3a2abcc333ef19d32dad9b46d41ab36117 100644
+index 015ba3c279b5b0186b056f5574765ac33b18b250..1ccac60980c9e4e8f13a608d3941862df1f158be 100644
 --- a/src/main/java/net/minecraft/server/MinecraftServer.java
 +++ b/src/main/java/net/minecraft/server/MinecraftServer.java
 @@ -313,8 +313,10 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<Runnab
@@ -124,7 +98,7 @@ index 5c9cf19ac19d989b857f094d36fc9ab71cfb60c6..78614c3a2abcc333ef19d32dad9b46d4
  
          S s0 = serverFactory.apply(thread); // CraftBukkit - decompile error
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index d86ca64b3ffdccee6dfd2eb09453ad31e963d318..c92116cb87c1c6468f6c1102fd8ec846f9c14812 100644
+index 8980219d1de080eb46fdf4d3dc7c597ee576e2f9..3eefebf2f5484589185d3fef9a023e13c932878b 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -48,6 +48,7 @@ import java.util.stream.Collectors;
@@ -135,7 +109,7 @@ index d86ca64b3ffdccee6dfd2eb09453ad31e963d318..c92116cb87c1c6468f6c1102fd8ec846
  import net.minecraft.advancements.Advancement;
  import net.minecraft.commands.CommandSourceStack;
  import net.minecraft.commands.Commands;
-@@ -1259,9 +1260,11 @@ public final class CraftServer implements Server {
+@@ -1264,9 +1265,11 @@ public final class CraftServer implements Server {
              worldKey = ResourceKey.create(net.minecraft.core.Registry.DIMENSION_REGISTRY, new net.minecraft.resources.ResourceLocation(creator.key().getNamespace().toLowerCase(java.util.Locale.ENGLISH), creator.key().getKey().toLowerCase(java.util.Locale.ENGLISH))); // Paper
          }
  

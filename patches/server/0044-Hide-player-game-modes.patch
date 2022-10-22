@@ -5,10 +5,10 @@ Subject: [PATCH] Hide player game modes
 
 
 diff --git a/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java b/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java
-index 734f05ee6f4ff997403f900760037a4f474effa4..03bc6298d6b50fe9a321dbf916000109889987be 100644
+index eb5089757e4aa31ca2572dec82ec83c6f17840da..c5628307ac79337037fb09afe365cf713901ffc6 100644
 --- a/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java
 +++ b/src/main/java/io/papermc/paper/configuration/GlobalConfiguration.java
-@@ -10,7 +10,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
+@@ -9,7 +9,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
  import net.minecraft.network.protocol.Packet;
  import net.minecraft.network.protocol.game.ServerboundPlaceRecipePacket;
  import net.minecraft.server.level.ServerPlayer;
@@ -18,7 +18,7 @@ index 734f05ee6f4ff997403f900760037a4f474effa4..03bc6298d6b50fe9a321dbf916000109
  import org.checkerframework.checker.nullness.qual.Nullable;
  import org.checkerframework.checker.units.qual.A;
  import org.spongepowered.configurate.objectmapping.ConfigSerializable;
-@@ -19,6 +21,7 @@ import org.spongepowered.configurate.objectmapping.meta.Required;
+@@ -18,6 +20,7 @@ import org.spongepowered.configurate.objectmapping.meta.Required;
  import org.spongepowered.configurate.objectmapping.meta.Setting;
  
  import java.util.List;
@@ -27,7 +27,7 @@ index 734f05ee6f4ff997403f900760037a4f474effa4..03bc6298d6b50fe9a321dbf916000109
  import java.util.Objects;
  import java.util.logging.Level; // Pufferfish
 diff --git a/src/main/java/net/minecraft/network/Connection.java b/src/main/java/net/minecraft/network/Connection.java
-index 7187c57fb9c7b9f5b04728d942e4de1dade525d7..4bc4cbb55b0a1040788d2e1e41ff58c7c0310292 100644
+index 387c5e934a0053296105e71b00b03f29eba7da26..1947a5565f071ed86ed5373c2ec8cbe07f0cc1c5 100644
 --- a/src/main/java/net/minecraft/network/Connection.java
 +++ b/src/main/java/net/minecraft/network/Connection.java
 @@ -36,6 +36,7 @@ import net.minecraft.network.chat.MutableComponent;

@@ -5,7 +5,7 @@ Subject: [PATCH] Utility method to sort chunks by distance
 
 
 diff --git a/src/main/java/net/minecraft/server/level/ChunkMap.java b/src/main/java/net/minecraft/server/level/ChunkMap.java
-index a9f83218af1675a15505acafd67d79954a8ed38d..877afa898a35f1ef12543394f052bb18cdad4257 100644
+index 9f0fe4672abcfe417fd5f160ca497ad323434d5f..4dd90ed0ed5e90b7803c767f9a0889546c3b4d8d 100644
 --- a/src/main/java/net/minecraft/server/level/ChunkMap.java
 +++ b/src/main/java/net/minecraft/server/level/ChunkMap.java
 @@ -14,6 +14,7 @@ import com.mojang.datafixers.util.Either;
@@ -44,7 +44,7 @@ index a9f83218af1675a15505acafd67d79954a8ed38d..877afa898a35f1ef12543394f052bb18
  import net.minecraft.CrashReport;
  import net.minecraft.CrashReportCategory;
  import net.minecraft.ReportedException;
-@@ -408,6 +416,63 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
+@@ -287,6 +295,63 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
      }
      // Paper end
  
@@ -93,7 +93,7 @@ index a9f83218af1675a15505acafd67d79954a8ed38d..877afa898a35f1ef12543394f052bb18
 +
 +    public Stream<ChunkHolder> getChunkHoldersSortedBySquaredPythagoreanDistanceToClosestPlayer(Stream<ChunkHolder> chunkHolders) {
 +        return chunkHolders
-+            .map(holder -> new ObjectObjectImmutablePair<>(holder, holder.getWorld().players
++            .map(holder -> new ObjectObjectImmutablePair<>(holder, holder.newChunkHolder.world.players
 +                .stream()
 +                .map(player -> player.getSquaredPythagoreanDistanceToChunk(holder.getPos().longKey))
 +                .min(Long::compare)
@@ -105,14 +105,14 @@ index a9f83218af1675a15505acafd67d79954a8ed38d..877afa898a35f1ef12543394f052bb18
 +
 +    // Suki end - sort chunks by distance
 +
-     boolean unloadingPlayerChunk = false; // Paper - do not allow ticket level changes while unloading chunks
      public ChunkMap(ServerLevel world, LevelStorageSource.LevelStorageAccess session, DataFixer dataFixer, StructureTemplateManager structureTemplateManager, Executor executor, BlockableEventLoop<Runnable> mainThreadExecutor, LightChunkGetter chunkProvider, ChunkGenerator chunkGenerator, ChunkProgressListener worldGenerationProgressListener, ChunkStatusUpdateListener chunkStatusChangeListener, Supplier<DimensionDataStorage> persistentStateManagerFactory, int viewDistance, boolean dsync) {
          super(session.getDimensionPath(world.dimension()).resolve("region"), dataFixer, dsync);
+         // Paper - rewrite chunk system
 diff --git a/src/main/java/net/minecraft/server/level/ServerPlayer.java b/src/main/java/net/minecraft/server/level/ServerPlayer.java
-index 5b467ea9ca01bea89bf5950d1111b6ed07ed9c41..32be488845de5ceb10dca6fddad87a60b243f747 100644
+index 580eef345f06d41f58617b8627f93899be73a947..381255387ad93cff0427f1bb56c08ef770fdd252 100644
 --- a/src/main/java/net/minecraft/server/level/ServerPlayer.java
 +++ b/src/main/java/net/minecraft/server/level/ServerPlayer.java
-@@ -388,6 +388,24 @@ public class ServerPlayer extends Player {
+@@ -392,6 +392,24 @@ public class ServerPlayer extends Player {
  
      // Suki end - utility functions for getting the player's level UUID
  
